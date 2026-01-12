@@ -666,7 +666,7 @@ mega_Palette <- function(N){
 
   }
 
-  with(palette_HLS, HLS(Hue, Lightness, Saturation)) |> colorspace::hex()
+  with(palette_HLS, colorspace::HLS(Hue, Lightness, Saturation)) |> colorspace::hex()
 
 }
 
