@@ -4,9 +4,17 @@
 \name{ajorant.figures-package}
 \alias{ajorant.figures}
 \alias{ajorant.figures-package}
-\title{ajorant.figures: What the Package Does (One Line, Title Case)}
+\title{ajorant.figures: Fonctions graphiques polyvalentes}
 \description{
-What the package does (one paragraph).
+Graphiques préconfigurés, mise en forme de graphiques, cartographie...
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/Amaury974/ajorant.figures}
+  \item Report bugs at \url{https://github.com/Amaury974/ajorant.figures/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Amaury Jorant \email{amaury.jorant@protonmail.com}

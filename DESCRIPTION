@@ -18,7 +18,8 @@ Suggests:
     cowplot,
     maps,
     sf,
-    sp
+    sp,
+    leaflet
 Depends: 
     ggplot2
 URL: https://github.com/Amaury974/ajorant.figures

@@ -14,7 +14,12 @@ palette de couleurs hexadécimal (vecteur).
 }
 \description{
 Palette supportant jusqu'à 50 couleurs à peut près discernables.
-
+}
+\details{
 Attention: Non adapté aux daltoniens.
 La distinguibilité depend fortement de l'écran et des paramètres d'affichage.
+}
+\examples{
+N_col = 4
+barplot(rep(1,N_col), col = mega_Palette(N_col))
 }

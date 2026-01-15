@@ -16,7 +16,7 @@
 #' @param .zoom tronquage des axes
 #'
 #' @returns Graphique ggplot2 observé / simulé avec indicateurs
-#' @import stats ggplot2
+#' @import ggplot2
 #' @export
 graph_perf <- function(data, obs, sim, .variable = NA, .poids = NULL, .effet_dev = FALSE, .couleur = 'blue', .zoom = FALSE){
 
@@ -105,6 +105,7 @@ graph_perf <- function(data, obs, sim, .variable = NA, .poids = NULL, .effet_dev
 #'
 #' @returns graphique ggplot2 avec indicateurs
 #' @import ggplot2
+#' @importFrom stats quantile
 #' @export
 graph_perf_ROC <- function(data, obs, sim, seuil_obs, seuil_sim){
 
@@ -212,7 +213,7 @@ fig_grid <- function(list_graph, titre, fichier, ncol,
 
   if (!requireNamespace("cowplot", quietly = TRUE)) {
     stop(
-      "Vous devez installer le package \"cowplot\" pour réaliser utiliser cette fonction.",
+      "Vous devez installer le package \"cowplot\" pour utiliser cette fonction.",
       call. = FALSE
     )
   }
@@ -384,7 +385,8 @@ fig_grid <- function(list_graph, titre, fichier, ncol,
 #'   Sinon elles sont réorganisées par ordre décroissant de leur médiane
 #'
 #' @returns Graphique ggplot2.
-#' @import stats ggplot2 dplyr stringr
+#' @import ggplot2 dplyr stringr
+#' @importFrom stats median aov as.formula reorder
 #' @export
 boxplot2 <- function(data, x, y, n_min = 5, .keep_order = FALSE){
 
@@ -466,16 +468,17 @@ boxplot2 <- function(data, x, y, n_min = 5, .keep_order = FALSE){
 #'
 #' @returns Sauvegarde dan `fichier` la figure d'analyse de la RandomForest.
 #' @import ggplot2 dplyr
+#' @importFrom stats reorder
 #' @export
 rf_fig <- function(random_forest, titre = names(random_forest), fichier, .expl_var = FALSE){
 
   if (!requireNamespace("cowplot", quietly = TRUE)) {
     stop(
-      "Vous devez installer le package \"cowplot\" pour réaliser utiliser cette fonction.",
+      "Vous devez installer le package \"cowplot\" pour utiliser cette fonction.",
       call. = FALSE
     )
   }
-  imp <- importance(random_forest) |> as.data.frame()
+  imp <- randomForest::importance(random_forest) |> as.data.frame()
   imp <- imp[,ncol(imp)-1:0]
   name_indics <- names(imp) #pour une RF categoriel, le 2ème indicateur est IncNodePurity, pour une RF numériques, ce sera MeanDecreaseGini
 
@@ -525,7 +528,7 @@ rf_fig <- function(random_forest, titre = names(random_forest), fichier, .expl_v
 
 #' Carto : dans quel département
 #'
-#'Identification du département à partir de coordonnées GPS.
+#' Identification du département à partir de coordonnées GPS.
 #'
 #' @param data Tableau de données.
 #' @param long Colonne de longitude.
@@ -541,21 +544,21 @@ quel_dep <- function(data, long = 'longitude', lat = 'latitude'){
 
   if (!requireNamespace("sp", quietly = TRUE)) {
     stop(
-      "Vous devez installer le package \"sp\" pour réaliser utiliser cette fonction.",
+      "Vous devez installer le package \"sp\" pour utiliser cette fonction.",
       call. = FALSE
     )
   }
 
   if (!requireNamespace("sf", quietly = TRUE)) {
     stop(
-      "Vous devez installer le package \"sf\" pour réaliser utiliser cette fonction.",
+      "Vous devez installer le package \"sf\" pour utiliser cette fonction.",
       call. = FALSE
     )
   }
 
   if (!requireNamespace("maps", quietly = TRUE)) {
     stop(
-      "Vous devez installer le package \"maps\" pour réaliser utiliser cette fonction.",
+      "Vous devez installer le package \"maps\" pour utiliser cette fonction.",
       call. = FALSE
     )
   }
@@ -611,7 +614,6 @@ quel_dep <- function(data, long = 'longitude', lat = 'latitude'){
 
 #' Palette de couleurs extra-large
 #'
-#' @description
 #' Palette supportant jusqu'à 50 couleurs à peut près discernables.
 #'
 #' Attention: Non adapté aux daltoniens.
@@ -620,13 +622,18 @@ quel_dep <- function(data, long = 'longitude', lat = 'latitude'){
 #' @param N Le nombre couleurs nécessaires dans la palette.
 #'
 #' @returns palette de couleurs hexadécimal (vecteur).
-#' @import stats dplyr
+#' @import dplyr
+#' @importFrom stats approx
 #' @export
+#'
+#' @examples
+#' N_col = 4
+#' barplot(rep(1,N_col), col = mega_Palette(N_col))
 mega_Palette <- function(N){
 
   if (!requireNamespace("colorspace", quietly = TRUE)) {
     stop(
-      "Vous devez installer le package \"colorspace\" pour réaliser utiliser cette fonction.",
+      "Vous devez installer le package \"colorspace\" pour utiliser cette fonction.",
       call. = FALSE
     )
   }
@@ -674,6 +681,70 @@ mega_Palette <- function(N){
 
 
 
+#' Liste de marqueurs colorés pour Leaflet
+#'
+#' Édite une liste de marqueurs colorés utilisable dans leaflet
+#'
+#' @param palette Palette de couleur sous forme `list(name = couleur_hexadecimal)`
+#'
+#' @returns liste de forme `leaflet::iconList()`
+#' @export
+#'
+#' @examples
+#'
+#' list_col <- list('rouge'="#FF0000",
+#'                  'vert'='#C5FF00',
+#'                  'bleu'='#00FFFF',
+#'                  'violet'='#9100FF')
+#'
+#' my_markers <- leaf_colored_markers(list_col)
+#'
+#' leaflet::leaflet() |>
+#' leaflet::addMarkers(lat = c(0,0,1,1),
+#'                     lng = c(0,1,0,1),
+#'                     icon = my_markers[names(list_col)])
+
+leaf_colored_markers <- function(palette){
+
+  if (!requireNamespace("leaflet", quietly = TRUE)) {
+    stop(
+      "Vous devez installer le package \"leaflet\" pour utiliser cette fonction.",
+      call. = FALSE
+    )
+  }
+
+path_ombre <- system.file(                                                      # chemin d'accès vers l'ombre du marqueur par défaut de Leaflet,
+  "htmlwidgets/lib/leaflet/images/marker-shadow.png",                           #  dont la forme est suffisamment proche de celle du svg qu'on utilise
+  package = "leaflet"                                                           #  (on ne peut pas utiliser le dit marqueur par défaut parce qu'il est en .png et donc que la colorisation serait beaucoup plus complexe qu'avec un .svg)
+)
+
+temp_dir <- tempdir()                                                           # Un emplacement temporaire pour stocker les icônes le temps de les utiliser.
+
+list_icons <- list()
+for (i in names(palette)) {
+
+  path <- paste0(temp_dir, "/icon_", i, ".svg")                                 # La direction où on va enregistrer temporairement les icônes colorées.
+
+  svg_color <- gsub("#000000", palette[i], svg_black)                           # Dans le fichier .svg on remplace la couleur noir par la couleur qu'on veut, en format hexadécimal également.
+  writeLines(svg_color, path)                                                   # On enregistre le svg dans le dossier temporaire
+
+  list_icons[[i]] <-                                                            # Les icônes sont dans une liste nommée dont le nom correspond à l'identifiant de l'exploitation
+    leaflet::makeIcon(iconUrl = path,                                           # On lit le fichier qu'on vient d'écrire (ça a l'air très con mais la fonction permet uniquement d'aller chercher une image en dehors de l'appli)
+             iconWidth = 24,                                                    # On définit la taille et la position de l'image par rapport au point
+             iconHeight = 24,
+             iconAnchorX = 12,
+             iconAnchorY = 24,
+
+             shadowUrl = path_ombre,                                            # idem pour ajouter l'ombre
+             shadowWidth = 41,
+             shadowHeight = 41,
+             shadowAnchorX = 12,
+             shadowAnchorY = 41
+    )
+}
+list_icons <- structure(list_icons, class = "leaflet_icon_set")                 # pour que la liste soit reconnue comme une liste d'icônes
+
+}
 
 
 
