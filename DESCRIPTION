@@ -1,4 +1,4 @@
-Package: ajorant.figures
+Package: pack.figures
 Title: Fonctions graphiques polyvalentes
 Version: 0.0.0.9000
 Authors@R: 
@@ -22,5 +22,5 @@ Suggests:
     leaflet
 Depends: 
     ggplot2
-URL: https://github.com/Amaury974/ajorant.figures
-BugReports: https://github.com/Amaury974/ajorant.figures/issues
+URL: https://github.com/Amaury974/pack.figures
+BugReports: https://github.com/Amaury974/pack.figures/issues
